@@ -1,0 +1,214 @@
+import random
+import tkinter as tk
+from tkinter import messagebox
+
+master = tk.Tk()
+master.geometry("1000x500")
+master.title("Quiz by Sanyam Garg")
+master["bg"] = "#56b4b8"
+
+difficulty_levels = ["Easy", "Medium", "Hard"]
+
+questions_by_level = {
+    "Easy": [
+        "Who developed python?",
+        "What is the result of the expression 2 ** 3?",
+        "Which one is the first search engine on the internet?",
+        "Which type of cloud computing service provides virtualized computing resources over the internet?",
+        "Total bits used by IPV6 address is?",
+    ],
+    "Medium": [
+        "Which Wireless Technology UCT is using primarily in its products?",
+        "Which domain UniCoverage Technologies (UCT) is working primarily?",
+        "What is the process of encoding information in such a way that only authorized parties can access it?",
+        "The letter, DOS stands for?",
+        "Identify the one which is not a networking device",
+    ],
+    "Hard": [
+        "What is the process of converting analog signals into digital data?",
+        "What is the term used to describe a software program that replicates itself and spreads to other computers?",
+        "Identify the language which is mainly used for Artificial Intelligence?",
+        "http://www.indiabix.com- is an example of what?",
+        "What is the process at the most detailed level of the data flow diagrams known as?",
+    ],
+}
+
+options_by_level = {
+    "Easy": [
+        ["Guido van Rossum", "Denish Ritchie", "Bjarne Stroustrup", "Tim Berners Lee"],
+        ["8", "5", "7", "6"],
+        ["Google", "Archive", "Altavista", "WAIS"],
+        [
+            "Software as a Service",
+            "Infrastructure as a Service",
+            "Platform as a Service",
+            "Function as a Service",
+        ],
+        ["64 bit", "256 bit", "128 bit", "32 bit"],
+    ],
+    "Medium": [
+        ["LoRaWAN", "Sigfox", "Zigbee", "LTE_M"],
+        ["Digital Transformation", "Consumer", "Fintech", "EdTech"],
+        ["Decryption", "Encryption", "Firewall", "Authentication"],
+        ["Disk operating system", "Data out system", "Data operating system", "Disk out system"],
+        ["Switch", "Traffic analyzer", "Bridge", "Router"]
+    ],
+    "Hard": [
+        ["Modulation", "Digitization", "Sampling", "Encoding"],
+        ["Worm", "Trojan", "Spyware", "Virus"],
+        ["Prolog", "Java", "J2EE", "C"],
+        ["An access code", "A URL", "A server", "A directory"],
+        ["Interfaces", "Functional primitives", "Data flow", "Transform descriptions"]
+    ],
+}
+
+out_list_by_level = {
+    "Easy": ["1", "1", "2", "2", "3"],
+    "Medium": ["1", "1", "2", "3", "2"],
+    "Hard": ["2", "1", "1", "2","2"],
+}
+
+difficulty_level = tk.StringVar(master)
+difficulty_level.set(difficulty_levels[0])
+
+i = result = 0
+questions = []
+options = []
+out_list = []
+
+v = tk.StringVar(master, "")
+que = tk.StringVar()
+op1 = tk.StringVar()
+op2 = tk.StringVar()
+op3 = tk.StringVar()
+op4 = tk.StringVar()
+time_remaining = tk.IntVar()
+timer = None
+
+def show_quiz():
+    difficulty_selection_frame.pack_forget()
+    quiz_frame.pack()
+    set_question()
+
+def set_question():
+    global i, questions, options, out_list
+    questions = []
+    options = []
+    out_list = []
+    selected_level = difficulty_level.get()
+    current_questions = list(questions_by_level[selected_level])
+    current_options = list(options_by_level[selected_level])
+    current_out_list = list(out_list_by_level[selected_level])
+    random.shuffle(current_questions)
+    for question in current_questions:
+        questions.append(question)
+        index = questions_by_level[selected_level].index(question)
+        options.append(current_options[index])
+        out_list.append(current_out_list[index])
+    i = 0
+    display_question()
+
+def display_question():
+    que.set("Q." + str(i + 1) + " " + questions[i])
+    option = options[i]
+    op1.set(option[0])
+    op2.set(option[1])
+    op3.set(option[2])
+    op4.set(option[3])
+    start_timer()
+    v.set("")
+
+def start_timer():
+    global timer
+    time_remaining.set(60)
+    decrement_timer()
+
+def decrement_timer():
+    global time_remaining, i, timer
+    time_remaining.set(time_remaining.get() - 1)
+    if time_remaining.get() == 0:
+        out_of_time()
+    else:
+        timer = master.after(1000, decrement_timer)
+
+def stop_timer():
+    global timer
+    if timer:
+        master.after_cancel(timer)
+        timer = None
+
+def myFun():
+    global i, result, timer
+    stop_timer()
+    if i < len(questions):
+        if v.get() == out_list[i]:
+            result += 1
+        i += 1
+        if i < len(questions):
+            display_question()
+        else:
+            display_result()
+
+def out_of_time():
+    global i
+    messagebox.showinfo("Time's Up!", "Sorry, you ran out of time!")
+    i += 1
+    if i < len(questions):
+        display_question()
+    else:
+        display_result()
+
+def display_result():
+    global result
+    messagebox.showinfo(
+        "Result",
+        f"Total Question: {len(questions)}\nCorrect: {result}\nIncorrect: {len(questions) - result}\n"
+        f"Result: {(result / len(questions)) * 100:.2f}%\n{get_performance_message(result, len(questions))}",
+    )
+    stop_timer()
+
+def get_performance_message(correct, total):
+    percentage = (correct / total) * 100
+    if percentage >= 90:
+        return "Excellent! Congratulations!"
+    elif percentage >= 70:
+        return "Good job! Well done!"
+    else:
+        return "You can do better next time!"
+
+def restart_quiz():
+    quiz_frame.pack_forget()
+    difficulty_selection_frame.pack(fill="both", expand=True)
+    global i, result
+    i = result = 0
+
+tk.Label(master, text="Technical Quiz", bg="#04112d", fg="white", font="Helvetica 16 bold").pack(pady=10)    
+
+difficulty_selection_frame = tk.Frame(master, bg="#04112d")
+difficulty_selection_frame.pack(fill="both", expand=True)
+
+tk.Label(difficulty_selection_frame, text="Select Difficulty Level:", bg="#04112d", fg="white", font="Helvetica 12 bold").pack(pady=10)
+tk.OptionMenu(difficulty_selection_frame, difficulty_level, *difficulty_levels).pack()
+tk.Button(difficulty_selection_frame, text="Start Quiz", command=show_quiz, bg="green", fg="white", width="10", font="Helvetica 12").pack(pady=10)
+
+
+quiz_frame = tk.Frame(master, bg="#56b4b8")
+tk.Label(quiz_frame, textvariable=que, bg="#04112d", fg="#ffffff", font="Helvetica 13 bold").pack(pady=10)
+
+
+tk.Radiobutton(quiz_frame, text="", variable=v, value="1", bg="#04112d").pack(anchor=tk.W)
+tk.Label(quiz_frame, textvariable=op1, bg="#04112d", fg="#ffffff", font="Helvetica 12").pack(anchor=tk.W)
+tk.Radiobutton(quiz_frame, text="", variable=v, value="2", bg="#04112d").pack(anchor=tk.W)
+tk.Label(quiz_frame, textvariable=op2, bg="#04112d", fg="#ffffff", font="Helvetica 12").pack(anchor=tk.W)
+tk.Radiobutton(quiz_frame, text="", variable=v, value="3", bg="#04112d").pack(anchor=tk.W)
+tk.Label(quiz_frame, textvariable=op3, bg="#04112d", fg="#ffffff", font="Helvetica 12").pack(anchor=tk.W)
+tk.Radiobutton(quiz_frame, text="", variable=v, value="4", bg="#04112d").pack(anchor=tk.W)
+tk.Label(quiz_frame, textvariable=op4, bg="#04112d", fg="#ffffff", font="Helvetica 12").pack(anchor=tk.W)
+tk.Label(quiz_frame, textvariable=time_remaining, bg="#04112d", fg="white", font="Helvetica 16").pack(pady=5)
+
+tk.Button(quiz_frame, text="Next", command=myFun, bg="green", fg="white", width="10", font="Helvetica 12").pack(pady=15)
+tk.Button(quiz_frame, text="Restart", command=restart_quiz, bg="blue", fg="white", width="10", font="Helvetica 12").pack()
+
+
+quiz_frame.pack_forget()
+master.mainloop()
