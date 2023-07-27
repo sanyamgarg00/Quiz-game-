@@ -1,4 +1,4 @@
-# Quiz-game-
+# Quiz-game
 The quiz game project is a simple interactive application developed using the Tkinter library in Python. The project aims to provide a quiz for users with different difficulty levels: Easy, Medium, and Hard. The user can select their desired difficulty level and then proceed to answer a series of multiple-choice questions.
 
 Here's how the quiz game works:
